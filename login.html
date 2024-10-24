@@ -4,18 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - World Chat & Problem-Solution Platform</title>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="850058591728-kbqkkh5ctdl0brlta2j60i888s05kfud.apps.googleusercontent.com">
-    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@10.1.0"></script>
     <style>
-        /* Add your CSS styles here */
         body, html {
             font-family: Arial, sans-serif;
-            background: url('https://c4.wallpaperflare.com/wallpaper/810/979/807/digital-digital-art-artwork-illustration-drawing-hd-wallpaper-preview.jpg') no-repeat center center fixed; 
-            background-size: cover;
-            margin: 0;
-            padding: 0;
+            background: radial-gradient(blue, green);
         }
         header {
             background-color: rgba(247, 155, 155, 0.63);
@@ -128,20 +121,12 @@
     </div>
 
     <script>
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
-            authDomain: "civic-sphere-67786.firebaseapp.com",
-            projectId: "civic-sphere-67786",
-            storageBucket: "civic-sphere-67786.appspot.com",
-            messagingSenderId: "850058591728",
-            appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
-            measurementId: "G-2J788SPFKZ"
-        };
+        // Initialize Appwrite SDK
+        const client = new Appwrite.Client()
+            .setEndpoint('https://cloud.appwrite.io/v1') 
+            .setProject('6719d10c0030b532812e');
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        const account = new Appwrite.Account(client);
 
         function toggleCard() {
             const card = document.getElementById('card');
@@ -149,18 +134,14 @@
         }
 
         function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    // Handle successful sign-in
-                    const user = result.user;
-                    console.log('User signed in:', user);
-                    alert('Welcome ' + user.displayName);
-                    // Redirect to your desired page
-                    // window.location.href = 'your-desired-page.html';
+            console.log("Attempting Google Sign-In...");
+            account.createOAuth2Session('google')
+                .then(response => {
+                    console.log('User signed in:', response);
+                    // Redirect to the homepage after successful login
+                    window.location.href = index.html;
                 })
-                .catch((error) => {
-                    // Handle Errors here.
+                .catch(error => {
                     console.error('Error during sign-in:', error);
                     alert('Sign-in failed: ' + error.message);
                 });
