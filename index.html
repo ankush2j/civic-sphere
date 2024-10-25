@@ -1,1 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Chat & Problem-Solution Platform</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            background: radial-gradient(rgba(69, 238, 210, 0.822), rgba(12, 8, 231, 0.829));
+        }
+
+        header {
+            background-color: rgba(219, 181, 181, 0.192);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0 15px;
+            font-weight: bold;
+        }
+z
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background-image: linear-gradient(to right, rgba(204, 203, 203, 0.863), #f7f7f7);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(rgb(40, 69, 196), rgb(119, 119, 119));
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(rgb(88, 111, 212), rgb(165, 164, 164));
+        }
+
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 60%; /* Adjust width as needed */
+            max-width: 1200px;
+            padding: 20px;
+            border-radius: 15px;
+            animation: float-animation 3s ease-in-out infinite; /* Apply floating animation */
+        }
+
+        @keyframes float-animation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px); /* Adjust the distance to float */
+            }
+        }
+
+        #posts, #world-chat {
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%; /* Full width */
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .post {
+            padding: 10px;
+            border-bottom: 1px solid #fdb8b870;
+        }
+
+        .post:last-child {
+            border-bottom: none;
+        }
+
+        #chat-box {
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #ffffff1e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #message {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #4fcef5c9;
+            background: rgba(184, 213, 224, 0.548);
+        }
+
+        button {
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        h1, h2, h3 {
+            color: #f7f7f7;
+        }
+
+        a {
+            color: #ffffffaf;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        p {
+            color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>World Chat & Problem-Solution Platform</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">World Chat</a>
+            <a href="login.html">Login</a>
+            <a href="#">Register</a>
+        </nav>
+    </header>
+    
+    <main>
+        <div id="content-container">
+            <section id="posts">
+                <h2>Recent Posts</h2>
+                <!-- Example of a post -->
+                <div class="post">
+                    <h3>User's Problem Title</h3>
+                    <p>Here is a description of the problem...</p>
+                    <a href="#">View Comments</a>
+                </div>
+                <div class="post">
+                    <h3>Another User's Problem</h3>
+                    <p>Description of another problem...</p>
+                    <a href="#">View Comments</a>
+                </div>
+            </section>
+
+            <section id="world-chat">
+                <h2>World Chat</h2>
+                <div id="chat-box">
+                    <!-- Messages will be loaded here -->
+                    <p><strong>User1:</strong> Hello everyone!</p>
+                    <p><strong>User2:</strong> Hi, how can I help you?</p>
+                </div>
+                <input type="text" id="message" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        function sendMessage() {
+            const messageBox = document.getElementById('message');
+            const chatBox = document.getElementById('chat-box');
+            
+            if (messageBox.value.trim() !== "") {
+                const newMessage = document.createElement('p');
+                newMessage.innerHTML = `<strong>You:</strong> ${messageBox.value}`;
+                chatBox.appendChild(newMessage);
+                
+                // Scroll to the bottom of the chat box
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                // Clear the message input
+                messageBox.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
 
