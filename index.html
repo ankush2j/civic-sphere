@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat & Problem-Solution Platform with Voice</title>
+    <title>World Chat Platform</title>
     <style>
         body, html {
             font-family: Arial, sans-serif;
@@ -104,7 +104,7 @@
 </head>
 <body>
     <header>
-        <h1>World Chat & Problem-Solution Platform</h1>
+        <h1>World Chat Platform</h1>
         <nav>
             <a href="#">Home</a>
             <a href="#">World Chat</a>
@@ -116,13 +116,11 @@
     <main>
         <div id="content-container">
             <section id="world-chat">
-                <h2>World Chat with Voice</h2>
+                <h2>World Chat</h2>
                 <div id="chat-messages"></div>
                 <input type="text" id="usernameInput" placeholder="Enter your name..." required>
                 <input type="text" id="messageInput" placeholder="Enter your message..." required>
-                <button id="sendBtn">Send Text</button>
-                <button id="recordBtn">Record Voice</button>
-                <button id="stopBtn" disabled>Stop Recording</button>
+                <button id="sendBtn">Send Message</button>
             </section>
         </div>
     </main>
@@ -130,124 +128,74 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
 
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBFfpvf7kQBZtLpzqItLHgv9gtYS8QHZ0o",
             authDomain: "rankmaster-07.firebaseapp.com",
- projectId: "rankmaster-07",
+            projectId: "rankmaster-07",
             storageBucket: "rankmaster-07.appspot.com",
             messagingSenderId: "312802413610",
-            appId: "1:312802413610:web:4720b6bc8a22e51d8a0753",
-            measurementId: "G-2HEQ246481"
+            appId: "1:312802413610:web:4720b6bc8a22e51d8a075 a",
+            measurementId: "G-5V5V5V5V5V5V5V5V5"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        // HTML elements
-        const chatMessages = document.getElementById('chat-messages');
+        // Reference to the 'messages' collection
+        const messagesRef = collection(db, 'messages');
+
+        // Get the username and message input fields
         const usernameInput = document.getElementById('usernameInput');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
-        const recordBtn = document.getElementById('recordBtn');
-        const stopBtn = document.getElementById('stopBtn');
 
-        let mediaRecorder;
-        let audioChunks = [];
-
-        // Display messages (text or voice)
-        function displayMessage(username, content, isAudio = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            if (isAudio) {
-                const audioElem = document.createElement('audio');
-                audioElem.controls = true;
-                audioElem.src = content;
-                messageDiv.innerHTML = `<strong>${username}:</strong> `;
-                messageDiv.appendChild(audioElem);
-            } else {
-                messageDiv.textContent = `${username}: ${content}`;
-            }
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;  // Auto-scroll to bottom
-        }
-
-        // Listen to real-time updates for messages
-        const messagesQuery = query(collection(db, "messages"), orderBy("timestamp"));
-        onSnapshot(messagesQuery, (snapshot) => {
-            chatMessages.innerHTML = '';  // Clear chat
-            snapshot.forEach((doc) => {
-                const { username, text, audioUrl } = doc.data();
-                if (audioUrl) {
-                    displayMessage(username, audioUrl, true);  // Display voice message
-                } else {
-                    displayMessage(username, text);  // Display text message
-                }
-            });
-        });
-
-        // Send a new text message
+        // Add an event listener to the send button
         sendBtn.addEventListener('click', async () => {
-            const username = usernameInput.value || 'Anonymous';
-            const message = messageInput.value;
-            if (message) {
-                await addDoc(collection(db, "messages"), {
-                    username: username,
-                    text: message,
-                    timestamp: serverTimestamp()
-                });
-                messageInput.value = '';  // Clear input field after sending
-            }
+            // Get the current timestamp
+            const timestamp = serverTimestamp();
+
+            // Create a new message document
+            await addDoc(messagesRef, {
+                username: usernameInput.value,
+                message: messageInput.value,
+                timestamp: timestamp
+            });
+
+            // Clear the input fields
+            usernameInput.value = '';
+            messageInput.value = '';
         });
 
-        // Record voice message
-        recordBtn.addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
-                    recordBtn.disabled = true;
-                    stopBtn.disabled = false;
-                    audioChunks = [];
+        // Get the chat messages container
+        const chatMessagesContainer = document.getElementById('chat-messages');
 
-                    mediaRecorder.addEventListener('dataavailable', event => {
-                        audioChunks.push(event.data);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error accessing microphone: ", error);
-                });
-        });
+        // Create a query to get the messages ordered by timestamp
+        const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-        // Stop recording and upload audio
-        stopBtn.addEventListener('click', () => {
-            mediaRecorder.stop();
-            stopBtn.disabled = true;
-            recordBtn.disabled = false;
+        // Listen for changes to the messages collection
+        onSnapshot(q, (snapshot) => {
+            // Clear the chat messages container
+            chatMessagesContainer.innerHTML = '';
 
-            mediaRecorder.addEventListener('stop', async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                const audioFileName = `audio_${Date.now()}.wav`;
-                const storageRef = ref(storage, audioFileName);
+            // Loop through each message document
+            snapshot.docs.forEach((doc) => {
+                // Get the message data
+                const messageData = doc.data();
 
-                // Upload audio file to Firebase Storage
-                await uploadBytes(storageRef, audioBlob);
-                const audioUrl = await getDownloadURL(storageRef);
+                // Create a new message element
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
 
-                // Save audio URL to Firestore
-                const username = usernameInput.value || 'Anonymous';
-                await addDoc(collection(db, "messages"), {
-                    username: username,
-                    audioUrl: audioUrl,
-                    timestamp: serverTimestamp()
-                });
+                // Add the username and message text to the element
+                messageElement.innerHTML = `<strong>${messageData.username}:</strong> ${messageData.message}`;
+
+                // Add the element to the chat messages container
+                chatMessagesContainer.appendChild(messageElement);
             });
         });
     </script>
-
 </body>
 </html>
