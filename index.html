@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat & Problem-Solution Platform</title>
+    <title>World Chat & Problem-Solution Platform with Voice</title>
     <style>
         body, html {
             font-family: Arial, sans-serif;
@@ -26,20 +26,6 @@
             padding: 0 15px;
             font-weight: bold;
         }
-z
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background-image: linear-gradient(to right, rgba(204, 203, 203, 0.863), #f7f7f7);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(rgb(40, 69, 196), rgb(119, 119, 119));
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(rgb(88, 111, 212), rgb(165, 164, 164));
-        }
 
         main {
             padding: 20px;
@@ -52,11 +38,11 @@ z
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            width: 60%; /* Adjust width as needed */
+            width: 60%;
             max-width: 1200px;
             padding: 20px;
             border-radius: 15px;
-            animation: float-animation 3s ease-in-out infinite; /* Apply floating animation */
+            animation: float-animation 3s ease-in-out infinite;
         }
 
         @keyframes float-animation {
@@ -64,69 +50,53 @@ z
                 transform: translateY(0);
             }
             50% {
-                transform: translateY(-10px); /* Adjust the distance to float */
+                transform: translateY(-10px);
             }
         }
 
-        #posts, #world-chat {
+        #world-chat {
             padding: 15px;
             border-radius: 10px;
-            width: 100%; /* Full width */
+            width: 100%;
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
         }
 
-        .post {
-            padding: 10px;
-            border-bottom: 1px solid #fdb8b870;
-        }
-
-        .post:last-child {
-            border-bottom: none;
-        }
-
-        #chat-box {
-            height: 200px;
+        #chat-messages {
+            height: 300px;
             overflow-y: scroll;
             border: 1px solid #ffffff1e;
             padding: 10px;
             border-radius: 5px;
+            margin-bottom: 15px;
         }
 
-        #message {
-            width: 80%;
+        .message {
+            margin-bottom: 15px;
+        }
+
+        input, button {
+            width: 100%;
             padding: 10px;
-            margin-right: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            border: 1px solid #4fcef5c9;
-            background: rgba(184, 213, 224, 0.548);
         }
 
         button {
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            border: none;
+            background-color: #4CAF50;
+            color: white;
             cursor: pointer;
-            border-radius: 5px;
         }
 
         button:hover {
-            background-color: #555;
+            background-color: #45a049;
         }
 
         h1, h2, h3 {
             color: #f7f7f7;
         }
 
-        a {
-            color: #ffffffaf;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
         p {
             color: #f5f5f5;
         }
@@ -145,52 +115,139 @@ z
     
     <main>
         <div id="content-container">
-            <section id="posts">
-                <h2>Recent Posts</h2>
-                <!-- Example of a post -->
-                <div class="post">
-                    <h3>User's Problem Title</h3>
-                    <p>Here is a description of the problem...</p>
-                    <a href="#">View Comments</a>
-                </div>
-                <div class="post">
-                    <h3>Another User's Problem</h3>
-                    <p>Description of another problem...</p>
-                    <a href="#">View Comments</a>
-                </div>
-            </section>
-
             <section id="world-chat">
-                <h2>World Chat</h2>
-                <div id="chat-box">
-                    <!-- Messages will be loaded here -->
-                    <p><strong>User1:</strong> Hello everyone!</p>
-                    <p><strong>User2:</strong> Hi, how can I help you?</p>
-                </div>
-                <input type="text" id="message" placeholder="Type your message...">
-                <button onclick="sendMessage()">Send</button>
+                <h2>World Chat with Voice</h2>
+                <div id="chat-messages"></div>
+                <input type="text" id="usernameInput" placeholder="Enter your name..." required>
+                <input type="text" id="messageInput" placeholder="Enter your message..." required>
+                <button id="sendBtn">Send Text</button>
+                <button id="recordBtn">Record Voice</button>
+                <button id="stopBtn" disabled>Stop Recording</button>
             </section>
         </div>
     </main>
 
-    <script>
-        function sendMessage() {
-            const messageBox = document.getElementById('message');
-            const chatBox = document.getElementById('chat-box');
-            
-            if (messageBox.value.trim() !== "") {
-                const newMessage = document.createElement('p');
-                newMessage.innerHTML = `<strong>You:</strong> ${messageBox.value}`;
-                chatBox.appendChild(newMessage);
-                
-                // Scroll to the bottom of the chat box
-                chatBox.scrollTop = chatBox.scrollHeight;
-                
-                // Clear the message input
-                messageBox.value = "";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFfpvf7kQBZtLpzqItLHgv9gtYS8QHZ0o",
+            authDomain: "rankmaster-07.firebaseapp.com",
+ projectId: "rankmaster-07",
+            storageBucket: "rankmaster-07.appspot.com",
+            messagingSenderId: "312802413610",
+            appId: "1:312802413610:web:4720b6bc8a22e51d8a0753",
+            measurementId: "G-2HEQ246481"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // HTML elements
+        const chatMessages = document.getElementById('chat-messages');
+        const usernameInput = document.getElementById('usernameInput');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Display messages (text or voice)
+        function displayMessage(username, content, isAudio = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            if (isAudio) {
+                const audioElem = document.createElement('audio');
+                audioElem.controls = true;
+                audioElem.src = content;
+                messageDiv.innerHTML = `<strong>${username}:</strong> `;
+                messageDiv.appendChild(audioElem);
+            } else {
+                messageDiv.textContent = `${username}: ${content}`;
             }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;  // Auto-scroll to bottom
         }
+
+        // Listen to real-time updates for messages
+        const messagesQuery = query(collection(db, "messages"), orderBy("timestamp"));
+        onSnapshot(messagesQuery, (snapshot) => {
+            chatMessages.innerHTML = '';  // Clear chat
+            snapshot.forEach((doc) => {
+                const { username, text, audioUrl } = doc.data();
+                if (audioUrl) {
+                    displayMessage(username, audioUrl, true);  // Display voice message
+                } else {
+                    displayMessage(username, text);  // Display text message
+                }
+            });
+        });
+
+        // Send a new text message
+        sendBtn.addEventListener('click', async () => {
+            const username = usernameInput.value || 'Anonymous';
+            const message = messageInput.value;
+            if (message) {
+                await addDoc(collection(db, "messages"), {
+                    username: username,
+                    text: message,
+                    timestamp: serverTimestamp()
+                });
+                messageInput.value = '';  // Clear input field after sending
+            }
+        });
+
+        // Record voice message
+        recordBtn.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    recordBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    audioChunks = [];
+
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error accessing microphone: ", error);
+                });
+        });
+
+        // Stop recording and upload audio
+        stopBtn.addEventListener('click', () => {
+            mediaRecorder.stop();
+            stopBtn.disabled = true;
+            recordBtn.disabled = false;
+
+            mediaRecorder.addEventListener('stop', async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioFileName = `audio_${Date.now()}.wav`;
+                const storageRef = ref(storage, audioFileName);
+
+                // Upload audio file to Firebase Storage
+                await uploadBytes(storageRef, audioBlob);
+                const audioUrl = await getDownloadURL(storageRef);
+
+                // Save audio URL to Firestore
+                const username = usernameInput.value || 'Anonymous';
+                await addDoc(collection(db, "messages"), {
+                    username: username,
+                    audioUrl: audioUrl,
+                    timestamp: serverTimestamp()
+                });
+            });
+        });
     </script>
+
 </body>
 </html>
-
