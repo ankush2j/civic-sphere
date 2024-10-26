@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat Platform</title>
+    <title>World Chat</title>
     <style>
         body, html {
             font-family: Arial, sans-serif;
@@ -46,7 +46,6 @@
             padding: 20px;
             border-radius: 15px;
             animation: float-animation 3s ease-in-out infinite;
-            overflow: hidden;
         }
 
         @keyframes float-animation {
@@ -64,7 +63,6 @@
             width: 80%;
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-            margin-right: 60px;
             overflow: hidden;
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
         }
@@ -80,7 +78,7 @@
 
         .message, .post {
             margin-bottom: 15px;
-            color: #ccct;
+            color: #ccc;
         }
 
         input, button, textarea {
@@ -114,10 +112,10 @@
     <header>
         <h1>World Chat Platform</h1>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">World Chat</a>
-            <a href="login.html">Login</a>
-            <a href="#">Register</a>
+            
+            <a href="chat.html">World Chat</a>
+            <a href="index.html">Login</a>
+            <a href="about us.html">About Us</a>
         </nav>
     </header>
     
@@ -144,16 +142,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-        // // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
-  authDomain: "civic-sphere-67786.firebaseapp.com",
-  projectId: "civic-sphere-67786",
-  storageBucket: "civic-sphere-67786.appspot.com",
-  messagingSenderId: "850058591728",
-  appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
-  measurementId: "G-2J788SPFKZ"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
+            authDomain: "civic-sphere-67786.firebaseapp.com",
+            projectId: "civic-sphere-67786",
+            storageBucket: "civic-sphere-67786.appspot.com",
+            messagingSenderId: "850058591728",
+            appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
+            measurementId: "G-2J788SPFKZ"
+        };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -179,44 +176,43 @@ const firebaseConfig = {
             messageInput.value = '';
         });
 
-        const chatMessagesContainer = document.getElementById('chat-messages');
-        const q = query(messagesRef, orderBy('timestamp', 'asc'));
-
-        onSnapshot(q, (snapshot) => {
-            chatMessagesContainer.innerHTML = '';
-            snapshot.docs.forEach((doc) => {
-                const messageData = doc.data();
-                const messageElement = document.createElement('div');
-                messageElement.className = 'message';
-                messageElement.innerHTML = `<strong>${messageData.username}:</strong> ${messageData.message}`;
-                chatMessagesContainer.appendChild(messageElement);
+        // Real-time listener for chat messages
+        onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+                chatMessages.appendChild(messageDiv);
             });
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
         });
 
         // Post functionality
         const postInput = document.getElementById('postInput');
         const postBtn = document.getElementById('postBtn');
-        const postsContainer = document.getElementById('posts');
 
         postBtn.addEventListener('click', async () => {
             const timestamp = serverTimestamp();
             await addDoc(postsRef, {
-                post: postInput.value,
+                content: postInput.value,
                 timestamp: timestamp
             });
             postInput.value = '';
         });
 
-        const p = query(postsRef, orderBy('timestamp', 'desc'));
-
-        onSnapshot(p, (snapshot) => {
+        // Real-time listener for posts
+        onSnapshot(query(postsRef, orderBy('timestamp')), (snapshot) => {
+            const postsContainer = document.getElementById('posts');
             postsContainer.innerHTML = '';
-            snapshot.docs.forEach((doc) => {
-                const postData = doc.data();
-                const postElement = document.createElement('div');
-                postElement.className = 'post';
-                postElement.innerHTML = `<p>${postData.post}</p>`;
-                postsContainer.appendChild(postElement);
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const postDiv = document.createElement('div');
+                postDiv.classList.add('post');
+                postDiv.innerHTML = `<p>${data.content}</p>`;
+                postsContainer.appendChild(postDiv);
             });
         });
     </script>
