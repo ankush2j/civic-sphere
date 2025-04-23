@@ -7,14 +7,14 @@
     <style>
         body, html {
             font-family: Arial, sans-serif;
-            background-image: url(https://c4.wallpaperflare.com/wallpaper/531/951/621/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-preview.jpg');
+            background-image: url(https://c4.wallpaperflare.com/wallpaper/531/951/621/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-preview.jpg);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
 
         header {
-            background-color: rgba(219, 181, 181, 0.192);
+            background-color: rgba(0, 0, 0, 0.6); /* Dark background for header */
             color: #fff;
             padding: 20px;
             text-align: center;
@@ -45,6 +45,7 @@
             max-width: 1200px;
             padding: 20px;
             border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark background for content */
             animation: float-animation 3s ease-in-out infinite;
         }
 
@@ -58,13 +59,13 @@
         }
 
         #world-chat, #post-container {
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             width: 80%;
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
             overflow: hidden;
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+            background: rgba(0, 0, 0, 0.5); /* Darker background for chat and post containers */
         }
 
         #chat-messages, #posts {
@@ -74,11 +75,12 @@
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter background for messages and posts */
         }
 
         .message, .post {
             margin-bottom: 15px;
-            color: #ccc;
+            color: #fff; /* White text for messages and posts */
         }
 
         input, button, textarea, label {
@@ -87,24 +89,26 @@
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.2); /* Light background for inputs */
+            color: white;
         }
 
         button {
-            background-color: #e6ca2ebb;
+            background-color: #ff6347; /* Tomato color for buttons */
             color: white;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #e7c738b0;
+            background-color: #e53e32; /* Darker tomato on hover */
         }
 
         h1, h2, h3 {
-            color: #f7f7f7;
+            color: #fff; /* White color for headings */
         }
 
         p {
-            color: #f5f5f5;
+            color: #f5f5f5; /* Slightly lighter white for paragraph text */
         }
 
         #fileInput {
