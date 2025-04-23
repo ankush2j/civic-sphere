@@ -3,83 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us</title>
+    <title>Login - World Chat & Problem-Solution Platform</title>
+    
     <style>
         body, html {
             font-family: Arial, sans-serif;
-            background-image: url('https://c1.wallpaperflare.com/preview/427/745/192/notebook-natural-laptop-macbook.jpg');
+            background-image: url('https://c4.wallpaperflare.com/wallpaper/531/951/621/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-preview.jpg');
+            background-size: cover;);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
 
         header {
-            background-color: rgba(219, 181, 181, 0.192);
+            background-color: rgba(241, 142, 61, 0.63);
             color: #fff;
             padding: 20px;
             text-align: center;
             border-radius: 10px;
             margin: 10px;
-            backdrop-filter: blur(5px);
         }
 
-        nav a {
+        #card-container {
+            margin: 100px auto;
+            width: 300px;
+        }
+
+        .card {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Flip animation on successful login */
+        .card.flip-success {
+            transform: rotateY(360deg);
+            transition: transform 0.6s;
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-front {
+            background-color: rgba(50, 50, 50, 0.8);
+        }
+
+        .card-back {
+            background-color: rgba(50, 50, 50, 0.8);
+            transform: rotateY(180deg);
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #fda64396;
             color: #fff;
-            text-decoration: none;
-            padding: 0 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
             font-weight: bold;
         }
 
-        main {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+        .google-signin-button {
+            background-color: #f4984293;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 10px;
+            width: 120px;
+            font-weight: bold;
+            margin: 6px;
         }
 
-        #about-content {
-            padding: 15px;
-            border-radius: 10px;
-            width: 80%;
-            margin: 20px auto;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
-        }
-
-        h2, h3 {
-            color: #f7f7f7;
-        }
-
-        p {
-            color: #f5f5f5;
+        .toggle-button {
+            margin-top: 10px;
+            background: none;
+            border: none;
+            color: #e7853481;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>About Us</h1>
-        <nav>
-            <a href="index.html">Home</a>
-            
-            <a href="login.html">Login</a>
-            <a href="about.html">About Us</a>
-        </nav>
-    </header>
-    
-    <main>
-        <div id="about-content">
-            <h2>Our Mission</h2>
-            <p>At the World Chat Platform, our mission is to create a safe and welcoming space for individuals from all walks of life to connect, share ideas, and foster understanding.</p>
 
-            <h2>Our Vision</h2>
-            <p>We envision a global community where communication knows no boundaries, and where diverse perspectives are celebrated and valued.</p>
-
-            <h2>What We Offer</h2>
-            <p>Our platform provides tools for real-time communication and collaboration, enabling users to engage in meaningful conversations and share knowledge.</p>
-
-            <h2>Join Us</h2>
-            <p>We invite you to become a part of our vibrant community. Together, we can create a better understanding of each other and the world around us.</p>
+    <div id="card-container">
+        <div class="card" id="card">
+            <div class="card-front">
+                <h2>Login</h2>
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <input type="text" id="loginEmail" placeholder="Email" required><br>
+                    <input type="password" id="loginPassword" placeholder="Password" required><br>
+                    <button type="submit">Login</button>
+                </form>
+                <button class="google-signin-button" onclick="signInWithGoogle()">Sign in with Google</button>
+                <button class="toggle-button" onclick="toggleCard()">Don't have an account? Sign Up</button>
+            </div>
+            <div class="card-back">
+                <h2>Sign Up</h2>
+                <form id="signUpForm" onsubmit="handleSignUp(event)">
+                    <input type="text" id="signupEmail" placeholder="Email" required><br>
+                    <input type="password" id="signupPassword" placeholder="Password" required><br>
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required><br>
+                    <button type="submit">Sign Up</button>
+                </form>
+                <button class="toggle-button" onclick="toggleCard()">Already have an account? Login</button>
+            </div>
         </div>
-    </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@10.1.0"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
+            authDomain: "civic-sphere-67786.firebaseapp.com",
+            projectId: "civic-sphere-67786",
+            storageBucket: "civic-sphere-67786.appspot.com",
+            messagingSenderId: "850058591728",
+            appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
+            measurementId: "G-2J788SPFKZ"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(); // Initialize Firebase Auth
+
+        function toggleCard() {
+            const card = document.getElementById('card');
+            card.classList.toggle('flipped');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in
+                    console.log('User signed in:', userCredential.user);
+
+                    // Trigger flip animation
+                    const card = document.getElementById('card');
+                    card.classList.add('flip-success');
+
+                    // Redirect after a slight delay to allow the animation to play
+                    setTimeout(() => {
+                        window.location.href = 'world.html'; // Redirect to the homepage
+                    }, 600); // Adjust the delay as needed
+                })
+                .catch((error) => {
+                    console.error('Error during sign-in:', error);
+                    alert('Sign-in failed: ' + error.message);
+                });
+        }
+
+        function handleSignUp(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed up
+                    console.log('User signed up:', userCredential.user);
+                    // Optionally redirect to login or other page
+                })
+                .catch((error) => {
+                    console.error('Error during sign-up:', error);
+                    alert('Sign-up failed: ' + error.message);
+                });
+        }
+
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    console.log('User signed in with Google:', result.user);
+                    window.location.href = 'world.html'; // Redirect to the homepage
+                })
+                .catch((error) => {
+                    console.error('Error during Google sign-in:', error);
+                    alert('Sign-in failed: ' + error.message);
+                });
+        }
+    </script>
 </body>
 </html>
