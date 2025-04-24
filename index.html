@@ -1,246 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Chat</title>
-    <style>
-        body, html {
-            font-family: Arial, sans-serif;
-            background-image: url(https://c4.wallpaperflare.com/wallpaper/531/951/621/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-preview.jpg);
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
+        authDomain: "civic-sphere-67786.firebaseapp.com",
+        projectId: "civic-sphere-67786",
+        storageBucket: "civic-sphere-67786.appspot.com",
+        messagingSenderId: "850058591728",
+        appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
+        measurementId: "G-2J788SPFKZ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // References
+    const messagesRef = collection(db, 'messages');
+    const postsRef = collection(db, 'posts');
+
+    // Chat functionality
+    const usernameInput = document.getElementById('usernameInput');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    sendBtn.addEventListener('click', async () => {
+        const username = usernameInput.value.trim();
+        const message = messageInput.value.trim();
+
+        if (!username || !message) {
+            alert("Please enter both your name and a message.");
+            return;
         }
 
-        header {
-            background-color: rgba(0, 0, 0, 0.6); /* Dark background for header */
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
-            margin: 10px;
-            backdrop-filter: blur(5px);
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 0 15px;
-            font-weight: bold;
-        }
-
-        main {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        #content-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 60%;
-            max-width: 1200px;
-            padding: 20px;
-            border-radius: 15px;
-            background-color: rgba(0, 0, 0, 0.7); /* Dark background for content */
-            animation: float-animation 3s ease-in-out infinite;
-        }
-
-        @keyframes float-animation {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        #world-chat, #post-container {
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            margin-bottom: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.5); /* Darker background for chat and post containers */
-        }
-
-        #chat-messages, #posts {
-            height: 300px;
-            overflow-y: scroll;
-            border: 1px solid #f5f5f5;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter background for messages and posts */
-        }
-
-        .message, .post {
-            margin-bottom: 15px;
-            color: #fff; /* White text for messages and posts */
-        }
-
-        input, button, textarea, label {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.2); /* Light background for inputs */
-            color: white;
-        }
-
-        button {
-            background-color: #ff6347; /* Tomato color for buttons */
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #e53e32; /* Darker tomato on hover */
-        }
-
-        h1, h2, h3 {
-            color: #fff; /* White color for headings */
-        }
-
-        p {
-            color: #f5f5f5; /* Slightly lighter white for paragraph text */
-        }
-
-        #fileInput {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>World Chat Platform</h1>
-        <nav>
-            <a href="index.html">World Chat</a>
-            <a href="login.html">Login</a>
-            <a href="about us.html">About us</a>
-        </nav>
-    </header>
-    
-    <main>
-        <div id="content-container">
-            <section id="world-chat">
-                <h2>World Chat</h2>
-                <div id="chat-messages"></div>
-                <input type="text" id="usernameInput" placeholder="Enter your name..." required>
-                <input type="text" id="messageInput" placeholder="Enter your message..." required>
-                <button id="sendBtn">Send Message</button>
-            </section>
-            
-            <section id="post-container">
-                <h2>Posts</h2>
-                <textarea id="postInput" placeholder="Write your post..."></textarea>
-                <button id="postBtn">Add Post</button>
-                <input type="file" id="fileInput" />
-                <label for="fileInput" id="fileLabel">Upload File</label>
-                <div id="posts"></div>
-            </section>
-        </div>
-    </main>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBPjeNrttYHDLrndEpRPGvY86AeoIrdYTQ",
-            authDomain: "civic-sphere-67786.firebaseapp.com",
-            projectId: "civic-sphere-67786",
-            storageBucket: "civic-sphere-67786.appspot.com",
-            messagingSenderId: "850058591728",
-            appId: "1:850058591728:web:9d9c6d43729b72c7aef135",
-            measurementId: "G-2J788SPFKZ"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // References to Firestore collections
-        const messagesRef = collection(db, 'messages');
-        const postsRef = collection(db, 'posts');
-
-        // Chat functionality
-        const usernameInput = document.getElementById('usernameInput');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        sendBtn.addEventListener('click', async () => {
-            const timestamp = serverTimestamp();
+        try {
             await addDoc(messagesRef, {
-                username: usernameInput.value,
-                message: messageInput.value,
-                timestamp: timestamp
+                username: username,
+                message: message,
+                timestamp: serverTimestamp()
             });
-            usernameInput.value = '';
             messageInput.value = '';
+        } catch (error) {
+            console.error("Error sending message:", error);
+            alert("Error sending message. Check console for details.");
+        }
+    });
+
+    // Real-time listener for chat
+    onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+            chatMessages.appendChild(messageDiv);
         });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
 
-        // Real-time listener for chat messages
-        onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
-            const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message');
-                messageDiv.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
-                chatMessages.appendChild(messageDiv);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-        });
+    // Post functionality
+    const postInput = document.getElementById('postInput');
+    const postBtn = document.getElementById('postBtn');
+    const fileInput = document.getElementById('fileInput');
 
-        // Post functionality
-        const postInput = document.getElementById('postInput');
-        const postBtn = document.getElementById('postBtn');
-        const fileInput = document.getElementById('fileInput');
+    postBtn.addEventListener('click', async () => {
+        const timestamp = serverTimestamp();
+        const postContent = postInput.value.trim();
 
-        postBtn.addEventListener('click', async () => {
-            const timestamp = serverTimestamp();
-            const postContent = postInput.value;
+        if (postContent === '' && !fileInput.files.length) {
+            alert("Please write a post or upload a file.");
+            return;
+        }
 
-            if (postContent.trim() === '' && !fileInput.files.length) {
-                alert("Please write a post or upload a file.");
-                return;
-            }
-
+        try {
             await addDoc(postsRef, {
                 content: postContent,
                 timestamp: timestamp
             });
-
             postInput.value = '';
-        });
+        } catch (error) {
+            console.error("Error adding post:", error);
+            alert("Error adding post. Check console.");
+        }
+    });
 
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                console.log("File selected:", file.name);
-                alert(`File "${file.name}" selected successfully.`);
-            }
-        });
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            console.log("File selected:", file.name);
+            alert(`File "${file.name}" selected successfully.`);
+        }
+    });
 
-        // Real-time listener for posts
-        onSnapshot(query(postsRef, orderBy('timestamp')), (snapshot) => {
-            const postsContainer = document.getElementById('posts');
-            postsContainer.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const postDiv = document.createElement('div');
-                postDiv.classList.add('post');
-                postDiv.innerHTML = `<p>${data.content}</p>`;
-                postsContainer.appendChild(postDiv);
-            });
+    // Real-time listener for posts
+    onSnapshot(query(postsRef, orderBy('timestamp')), (snapshot) => {
+        const postsContainer = document.getElementById('posts');
+        postsContainer.innerHTML = '';
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const postDiv = document.createElement('div');
+            postDiv.classList.add('post');
+            postDiv.innerHTML = `<p>${data.content}</p>`;
+            postsContainer.appendChild(postDiv);
         });
-    </script>
-</body>
-</html>
+    });
+</script>
