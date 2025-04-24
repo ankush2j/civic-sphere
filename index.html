@@ -1,3 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Chat</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            background-image: url(https://c4.wallpaperflare.com/wallpaper/531/951/621/digital-digital-art-artwork-illustration-minimalism-hd-wallpaper-preview.jpg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        header {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0 15px;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 60%;
+            max-width: 1200px;
+            padding: 20px;
+            border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: float-animation 3s ease-in-out infinite;
+        }
+
+        @keyframes float-animation {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #world-chat, #post-container {
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #chat-messages, #posts {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .message, .post {
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        input, button, textarea, label {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        button {
+            background-color: #ff6347;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e53e32;
+        }
+
+        h1, h2, h3 {
+            color: #fff;
+        }
+
+        p {
+            color: #f5f5f5;
+        }
+
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>World Chat Platform</h1>
+    <nav>
+        <a href="index.html">World Chat</a>
+        <a href="login.html">Login</a>
+        <a href="about us.html">About us</a>
+    </nav>
+</header>
+
+<main>
+    <div id="content-container">
+        <section id="world-chat">
+            <h2>World Chat</h2>
+            <div id="chat-messages"></div>
+            <input type="text" id="usernameInput" placeholder="Enter your name..." required>
+            <input type="text" id="messageInput" placeholder="Enter your message..." required>
+            <button id="sendBtn">Send Message</button>
+        </section>
+
+        <section id="post-container">
+            <h2>Posts</h2>
+            <textarea id="postInput" placeholder="Write your post..."></textarea>
+            <button id="postBtn">Add Post</button>
+            <input type="file" id="fileInput" />
+            <label for="fileInput" id="fileLabel">Upload File</label>
+            <div id="posts"></div>
+        </section>
+    </div>
+</main>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
@@ -12,15 +156,12 @@
         measurementId: "G-2J788SPFKZ"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // References
     const messagesRef = collection(db, 'messages');
     const postsRef = collection(db, 'posts');
 
-    // Chat functionality
     const usernameInput = document.getElementById('usernameInput');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
@@ -43,11 +184,10 @@
             messageInput.value = '';
         } catch (error) {
             console.error("Error sending message:", error);
-            alert("Error sending message. Check console for details.");
+            alert("Error sending message.");
         }
     });
 
-    // Real-time listener for chat
     onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
         const chatMessages = document.getElementById('chat-messages');
         chatMessages.innerHTML = '';
@@ -61,15 +201,12 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
     });
 
-    // Post functionality
     const postInput = document.getElementById('postInput');
     const postBtn = document.getElementById('postBtn');
     const fileInput = document.getElementById('fileInput');
 
     postBtn.addEventListener('click', async () => {
-        const timestamp = serverTimestamp();
         const postContent = postInput.value.trim();
-
         if (postContent === '' && !fileInput.files.length) {
             alert("Please write a post or upload a file.");
             return;
@@ -78,12 +215,12 @@
         try {
             await addDoc(postsRef, {
                 content: postContent,
-                timestamp: timestamp
+                timestamp: serverTimestamp()
             });
             postInput.value = '';
         } catch (error) {
             console.error("Error adding post:", error);
-            alert("Error adding post. Check console.");
+            alert("Error adding post.");
         }
     });
 
@@ -95,7 +232,6 @@
         }
     });
 
-    // Real-time listener for posts
     onSnapshot(query(postsRef, orderBy('timestamp')), (snapshot) => {
         const postsContainer = document.getElementById('posts');
         postsContainer.innerHTML = '';
@@ -108,3 +244,5 @@
         });
     });
 </script>
+</body>
+</html>
